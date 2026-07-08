@@ -10,11 +10,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
     background: #f5f5f5;
   }
-  .box { text-align: center; padding: 24px; max-width: 320px; }
+  .box { text-align: center; padding: 24px; max-width: 420px; width: 100%; box-sizing: border-box; }
   .spinner {
     width: 36px; height: 36px;
     border: 4px solid #ddd;
@@ -27,7 +27,7 @@
   p { color: #555; font-size: 14px; line-height: 1.5; }
   .error { color: #d9363e; font-weight: bold; }
   button {
-    margin-top: 16px;
+    margin-top: 12px;
     padding: 12px 20px;
     font-size: 15px;
     background: #03c75a;
@@ -35,7 +35,36 @@
     border: none;
     border-radius: 8px;
     display: none;
+    cursor: pointer;
   }
+  .debug-box {
+    margin-top: 24px;
+    padding: 14px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: left;
+    display: none;
+  }
+  .debug-box h4 { margin: 0 0 8px; font-size: 13px; color: #333; }
+  .debug-box textarea {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 12px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: none;
+    height: 54px;
+  }
+  .copy-btn {
+    display: inline-block;
+    margin-top: 8px;
+    background: #333;
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+  .copy-btn.copied { background: #03c75a; }
 </style>
 </head>
 <body>
@@ -43,11 +72,17 @@
     <div class="spinner" id="spinner"></div>
     <p id="message">로그인 처리 중입니다...<br>잠시 후 앱으로 자동 이동합니다.</p>
     <button id="manualBtn">앱으로 돌아가기</button>
+
+    <!-- 에디터/빌드 없이 테스트할 때 수동으로 복사해서 쓰는 영역 -->
+    <div class="debug-box" id="debugBox">
+      <h4>🛠 디버그: 아래 값을 복사해서 유니티에 붙여넣으세요</h4>
+      <textarea id="debugValue" readonly></textarea>
+      <button class="copy-btn" id="copyBtn" style="display:inline-block;">복사</button>
+    </div>
   </div>
 
 <script>
-  // 앱에서 등록한 커스텀 URL 스킴. 실제 앱 스킴과 반드시 동일해야 합니다.
-  const APP_SCHEME = "naverlogin"; // 예: naverlogin://callback?code=...&state=...
+  const APP_SCHEME = "naverlogin";
   const APP_HOST = "callback";
 
   const params = new URLSearchParams(window.location.search);
@@ -59,6 +94,9 @@
   const messageEl = document.getElementById("message");
   const spinnerEl = document.getElementById("spinner");
   const btnEl = document.getElementById("manualBtn");
+  const debugBox = document.getElementById("debugBox");
+  const debugValue = document.getElementById("debugValue");
+  const copyBtn = document.getElementById("copyBtn");
 
   function buildDeepLink() {
     const qs = new URLSearchParams();
@@ -78,6 +116,25 @@
     window.location.href = deepLink;
   }
 
+  // 디버그 박스는 항상 값 표시 (에디터 테스트용)
+  debugValue.value = deepLink;
+  debugBox.style.display = "block";
+
+  copyBtn.addEventListener("click", async function () {
+    try {
+      await navigator.clipboard.writeText(deepLink);
+    } catch (e) {
+      debugValue.select();
+      document.execCommand("copy");
+    }
+    copyBtn.textContent = "복사됨!";
+    copyBtn.classList.add("copied");
+    setTimeout(function () {
+      copyBtn.textContent = "복사";
+      copyBtn.classList.remove("copied");
+    }, 1500);
+  });
+
   if (error) {
     messageEl.classList.add("error");
     messageEl.textContent = "로그인에 실패했습니다: " + (errorDescription || error);
@@ -85,10 +142,9 @@
     messageEl.classList.add("error");
     messageEl.textContent = "인가 코드(code)를 받지 못했습니다.";
   } else {
-    // 자동으로 앱 딥링크 시도
     goToApp();
     setTimeout(function () {
-      messageEl.textContent = "자동으로 이동하지 않으면 아래 버튼을 눌러주세요.";
+      messageEl.textContent = "자동으로 이동하지 않으면 아래 버튼을 누르거나, 에디터 테스트 중이면 값을 복사해 붙여넣으세요.";
       btnEl.style.display = "inline-block";
     }, 1200);
   }
@@ -97,3 +153,4 @@
 </script>
 </body>
 </html>
+
