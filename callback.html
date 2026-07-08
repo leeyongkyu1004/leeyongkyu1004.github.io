@@ -14,103 +14,86 @@
     margin: 0;
     background: #f5f5f5;
   }
-  .box {
-    text-align: center;
-    padding: 24px;
-  }
+  .box { text-align: center; padding: 24px; max-width: 320px; }
   .spinner {
-    width: 36px;
-    height: 36px;
+    width: 36px; height: 36px;
     border: 4px solid #ddd;
-    border-top-color: #03c75a; /* 네이버 그린 */
+    border-top-color: #03c75a;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin: 0 auto 16px;
   }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  p { color: #555; font-size: 14px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  p { color: #555; font-size: 14px; line-height: 1.5; }
   .error { color: #d9363e; font-weight: bold; }
+  button {
+    margin-top: 16px;
+    padding: 12px 20px;
+    font-size: 15px;
+    background: #03c75a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    display: none;
+  }
 </style>
 </head>
 <body>
   <div class="box">
     <div class="spinner" id="spinner"></div>
-    <p id="message">네이버 로그인 처리 중입니다...</p>
+    <p id="message">로그인 처리 중입니다...<br>잠시 후 앱으로 자동 이동합니다.</p>
+    <button id="manualBtn">앱으로 돌아가기</button>
   </div>
 
 <script>
-  // 네이버 로그인(Implicit Grant)은 access_token, state 등을
-  // URL의 해시(#) 뒤에 담아서 이 콜백 페이지로 리다이렉트합니다.
-  // 예: https://내깃페이지.github.io/callback.html#access_token=xxx&token_type=bearer&state=xxx&expires_in=3600
+  // 앱에서 등록한 커스텀 URL 스킴. 실제 앱 스킴과 반드시 동일해야 합니다.
+  const APP_SCHEME = "naverlogin"; // 예: naverlogin://callback?code=...&state=...
+  const APP_HOST = "callback";
 
-  function parseHashParams(hash) {
-    const params = {};
-    const cleaned = hash.startsWith("#") ? hash.slice(1) : hash;
-    cleaned.split("&").forEach(function (pair) {
-      if (!pair) return;
-      const [key, value] = pair.split("=");
-      params[decodeURIComponent(key)] = decodeURIComponent(value || "");
-    });
-    return params;
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+  const state = params.get("state");
+  const error = params.get("error");
+  const errorDescription = params.get("error_description");
+
+  const messageEl = document.getElementById("message");
+  const spinnerEl = document.getElementById("spinner");
+  const btnEl = document.getElementById("manualBtn");
+
+  function buildDeepLink() {
+    const qs = new URLSearchParams();
+    if (error) {
+      qs.set("error", error);
+      if (errorDescription) qs.set("error_description", errorDescription);
+    } else {
+      qs.set("code", code || "");
+      qs.set("state", state || "");
+    }
+    return `${APP_SCHEME}://${APP_HOST}?${qs.toString()}`;
   }
 
-  (function () {
-    const params = parseHashParams(window.location.hash);
-    const messageEl = document.getElementById("message");
-    const spinnerEl = document.getElementById("spinner");
+  const deepLink = buildDeepLink();
 
-    // 1) 에러가 온 경우 (사용자가 로그인 취소 등)
-    if (params.error) {
-      spinnerEl.style.display = "none";
-      messageEl.textContent = "로그인에 실패했습니다: " + (params.error_description || params.error);
-      messageEl.classList.add("error");
-      return;
-    }
+  function goToApp() {
+    window.location.href = deepLink;
+  }
 
-    // 2) state 검증 (CSRF 방지) - 로그인 시작 전 저장해둔 state와 비교
-    const savedState = sessionStorage.getItem("naver_login_state");
-    if (savedState && params.state && savedState !== params.state) {
-      spinnerEl.style.display = "none";
-      messageEl.textContent = "잘못된 접근입니다. (state 불일치)";
-      messageEl.classList.add("error");
-      return;
-    }
+  if (error) {
+    messageEl.classList.add("error");
+    messageEl.textContent = "로그인에 실패했습니다: " + (errorDescription || error);
+  } else if (!code) {
+    messageEl.classList.add("error");
+    messageEl.textContent = "인가 코드(code)를 받지 못했습니다.";
+  } else {
+    // 자동으로 앱 딥링크 시도
+    goToApp();
+    setTimeout(function () {
+      messageEl.textContent = "자동으로 이동하지 않으면 아래 버튼을 눌러주세요.";
+      btnEl.style.display = "inline-block";
+    }, 1200);
+  }
 
-    // 3) 정상적으로 access_token을 받은 경우
-    if (params.access_token) {
-      // 필요에 맞게 저장 방식을 선택하세요.
-      // 주의: access_token을 localStorage/sessionStorage에 저장하는 것은
-      // XSS에 취약할 수 있으니, 가능하면 백엔드 서버로 토큰을 넘겨
-      // 서버가 검증/세션 처리를 하도록 하는 것을 권장합니다.
-      sessionStorage.setItem("naver_access_token", params.access_token);
-      if (params.refresh_token) {
-        sessionStorage.setItem("naver_refresh_token", params.refresh_token);
-      }
-
-      messageEl.textContent = "로그인 성공! 이동 중입니다...";
-
-      // 팝업 창으로 로그인한 경우 -> 부모창에 알리고 팝업 닫기
-      if (window.opener && !window.opener.closed) {
-        window.opener.postMessage(
-          { type: "NAVER_LOGIN_SUCCESS", accessToken: params.access_token },
-          "*" // 실제 서비스에서는 "*" 대신 정확한 origin을 지정하세요.
-        );
-        window.close();
-      } else {
-        // 팝업이 아니라 전체 페이지 리다이렉트 방식이었다면
-        // 원하는 페이지로 이동시키세요.
-        setTimeout(function () {
-          window.location.href = "index.html";
-        }, 800);
-      }
-    } else {
-      spinnerEl.style.display = "none";
-      messageEl.textContent = "로그인 정보를 확인할 수 없습니다.";
-      messageEl.classList.add("error");
-    }
-  })();
+  btnEl.addEventListener("click", goToApp);
 </script>
 </body>
 </html>
