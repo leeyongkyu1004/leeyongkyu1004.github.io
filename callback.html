@@ -37,34 +37,6 @@
     display: none;
     cursor: pointer;
   }
-  .debug-box {
-    margin-top: 24px;
-    padding: 14px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    text-align: left;
-    display: none;
-  }
-  .debug-box h4 { margin: 0 0 8px; font-size: 13px; color: #333; }
-  .debug-box textarea {
-    width: 100%;
-    box-sizing: border-box;
-    font-size: 12px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    resize: none;
-    height: 54px;
-  }
-  .copy-btn {
-    display: inline-block;
-    margin-top: 8px;
-    background: #333;
-    font-size: 13px;
-    padding: 8px 14px;
-  }
-  .copy-btn.copied { background: #03c75a; }
 </style>
 </head>
 <body>
@@ -72,13 +44,6 @@
     <div class="spinner" id="spinner"></div>
     <p id="message">로그인 처리 중입니다...</p>
     <button id="manualBtn">앱으로 돌아가기</button>
-
-    <!-- 자동 전달이 둘 다 실패했을 때(수동 테스트 등)만 노출 -->
-    <div class="debug-box" id="debugBox">
-      <h4>🛠 자동 전달이 안 됐다면 아래 값을 복사해 유니티에 붙여넣으세요</h4>
-      <textarea id="debugValue" readonly></textarea>
-      <button class="copy-btn" id="copyBtn" style="display:inline-block;">복사</button>
-    </div>
   </div>
 
 <script>
@@ -97,9 +62,6 @@
   const messageEl = document.getElementById("message");
   const spinnerEl = document.getElementById("spinner");
   const btnEl = document.getElementById("manualBtn");
-  const debugBox = document.getElementById("debugBox");
-  const debugValue = document.getElementById("debugValue");
-  const copyBtn = document.getElementById("copyBtn");
 
   function buildQueryString() {
     const qs = new URLSearchParams();
@@ -129,21 +91,6 @@
     window.location.href = deepLink;
   }
 
-  copyBtn.addEventListener("click", async function () {
-    try {
-      await navigator.clipboard.writeText(deepLink);
-    } catch (e) {
-      debugValue.select();
-      document.execCommand("copy");
-    }
-    copyBtn.textContent = "복사됨!";
-    copyBtn.classList.add("copied");
-    setTimeout(function () {
-      copyBtn.textContent = "복사";
-      copyBtn.classList.remove("copied");
-    }, 1500);
-  });
-
   (async function () {
     if (error) {
       messageEl.classList.add("error");
@@ -165,16 +112,13 @@
         ? "로그인 처리가 완료되었습니다. 이 창은 닫으셔도 됩니다."
         : "처리 중입니다. 앱으로 자동 이동하지 않으면 아래 버튼을 눌러주세요.";
       btnEl.style.display = "inline-block";
-
-      // 둘 다 실패했을 가능성 대비 항상 디버그 값도 노출
-      debugValue.value = deepLink;
-      debugBox.style.display = "block";
     }
   })();
 
   btnEl.addEventListener("click", tryDeepLink);
 </script>
 </body>
+</html>
 </html>
 
 
