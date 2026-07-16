@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>EVERYONE'S APPROACH - Login</title>
+<style>
+  :root {
+    --white: #f5f7fa;
+    --gold: #e7c27a;
+    --dim: rgba(245, 247, 250, 0.5);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #000;
+    color: var(--white);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* 로그인 화면은 위쪽에만 로고를 두고, 중앙~하단은 Unity 로그인 버튼이 올라올 공간으로 비워둠 */
+  .stage {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+  }
+
+  .scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(30, 34, 44, 0.9), rgba(0, 0, 0, 0.98) 65%);
+  }
+
+  .brand {
+    position: absolute;
+    top: 6vh;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .mark {
+    width: clamp(48px, 6vw, 72px);
+    height: clamp(48px, 6vw, 72px);
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+  }
+
+  .mark path {
+    fill: none;
+    stroke: var(--white);
+    stroke-width: 7;
+    stroke-linejoin: round;
+  }
+
+  .brand h1 {
+    font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .brand p {
+    margin-top: 0.4rem;
+    font-size: clamp(0.9rem, 1.6vw, 1.15rem);
+    color: var(--dim);
+  }
+
+  .welcome {
+    position: absolute;
+    bottom: 6vh;
+    left: 0;
+    right: 0;
+    text-align: center;
+  }
+
+  .welcome p.main {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    font-weight: 600;
+    color: var(--gold);
+  }
+
+  .welcome p.sub {
+    margin-top: 0.3rem;
+    font-size: clamp(0.8rem, 1.4vw, 1rem);
+    color: var(--dim);
+  }
+</style>
+</head>
+<body>
+  <div class="scrim"></div>
+  <div class="stage">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 10 L90 88 L64 88 L50 60 L36 88 L10 88 Z" />
+      </svg>
+      <h1>EVERYONE'S APPROACH</h1>
+      <p>모두의 아프로치</p>
+    </div>
+
+    <div class="welcome">
+      <p class="main">로그인하고 시작해보세요</p>
+      <p class="sub">간편하게 로그인하면 바로 즐길 수 있어요</p>
+    </div>
+  </div>
+</body>
+</html>
