@@ -18,76 +18,196 @@
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
-    background: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: #14161f;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    color: #ffffff;
   }
 
-  /* 배너 - 탭하면 CTA 메시지를 Unity로 보낸다 */
-  .banner {
+  /* ── 상단 비주얼 ─────────────────────────────────────────── */
+
+  .hero {
     flex: 1;
     min-height: 0;
     position: relative;
-    background: linear-gradient(135deg, #5b7cfa 0%, #9b5bfa 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    background: radial-gradient(120% 90% at 50% 0%, #3b3f6b 0%, #1b1e33 55%, #14161f 100%);
     overflow: hidden;
+    cursor: pointer;
   }
 
-  .banner img {
+  /* 배경에 은은하게 떠다니는 장식 원 */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 0.25;
+  }
+
+  .blob.a {
+    width: 200px; height: 200px;
+    background: #f0c14b;
+    top: -60px; left: -50px;
+    animation: drift 9s ease-in-out infinite;
+  }
+
+  .blob.b {
+    width: 150px; height: 150px;
+    background: #6d7bff;
+    bottom: -40px; right: -30px;
+    animation: drift 11s ease-in-out infinite reverse;
+  }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0); }
+    50%      { transform: translate(14px, 18px); }
+  }
+
+  .badge {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: #14161f;
+    background: linear-gradient(135deg, #ffd977 0%, #f0b429 100%);
+    border-radius: 999px;
+  }
+
+  /* 코인 일러스트 - 이미지가 없을 때 보여주는 기본 아트 */
+  .coin {
+    animation: float 3.2s ease-in-out infinite;
+    filter: drop-shadow(0 12px 24px rgba(240, 180, 41, 0.35));
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+
+  .hero img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: none;
   }
 
-  .banner img.visible {
-    display: block;
+  .hero img.visible { display: block; }
+  .hero-art.hidden  { display: none; }
+
+  .hero-art {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* 이미지가 없을 때 보이는 기본 문구 */
-  .banner-text {
-    position: absolute;
-    padding: 24px;
+  /* ── 하단 내용 ───────────────────────────────────────────── */
+
+  .content {
+    flex: 0 0 auto;
+    padding: 22px 22px 24px;
+    background: #1b1e2b;
     text-align: center;
-    color: #ffffff;
+    animation: rise 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) both;
   }
 
-  .banner-text h1 {
-    margin: 0 0 10px;
-    font-size: 22px;
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .content h1 {
+    margin: 0 0 8px;
+    font-size: 21px;
+    font-weight: 800;
     line-height: 1.35;
     word-break: keep-all;
   }
 
-  .banner-text p {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.6;
-    opacity: 0.9;
+  .content p {
+    margin: 0 0 18px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: #a3a8bd;
     word-break: keep-all;
   }
 
-  .banner-text.hidden {
-    display: none;
+  .cta {
+    width: 100%;
+    padding: 15px 18px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    color: #14161f;
+    background: linear-gradient(135deg, #ffd977 0%, #f0b429 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(240, 180, 41, 0.28);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
   }
 
+  .cta:active {
+    transform: translateY(2px);
+    box-shadow: 0 4px 12px rgba(240, 180, 41, 0.22);
+  }
+
+  .cta .arrow {
+    margin-left: 6px;
+    display: inline-block;
+    animation: nudge 1.6s ease-in-out infinite;
+  }
+
+  @keyframes nudge {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(4px); }
+  }
 </style>
 </head>
 <body>
-  <div class="banner" id="banner">
+  <div class="hero" id="hero">
+    <div class="blob a"></div>
+    <div class="blob b"></div>
+
     <img id="adImage" alt="" />
-    <div class="banner-text" id="bannerText">
-      <h1 id="adTitle">이벤트 진행 중</h1>
-      <p id="adBody">지금 참여하고 포인트를 받아가세요.</p>
+
+    <div class="hero-art" id="heroArt">
+      <span class="badge">EVENT</span>
+
+      <svg class="coin" width="132" height="132" viewBox="0 0 132 132" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="66" cy="66" r="52" fill="#f0b429"/>
+        <circle cx="66" cy="66" r="52" fill="url(#shine)"/>
+        <circle cx="66" cy="66" r="41" fill="#ffd977"/>
+        <path d="M66 40 L73.4 57.6 L92 59.2 L77.9 71.6 L82.2 90 L66 80.2 L49.8 90 L54.1 71.6 L40 59.2 L58.6 57.6 Z" fill="#b8801a"/>
+        <defs>
+          <linearGradient id="shine" x1="20" y1="20" x2="112" y2="112" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#ffffff" stop-opacity="0.45"/>
+            <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+      </svg>
     </div>
   </div>
 
+  <div class="content">
+    <h1 id="adTitle">이벤트 진행 중</h1>
+    <p id="adBody">지금 참여하고 포인트를 받아가세요.</p>
+    <button class="cta" id="ctaBtn">
+      <span id="adCtaText">자세히 보기</span><span class="arrow">›</span>
+    </button>
+  </div>
+
 <script>
+  // CTA를 눌렀을 때 Unity로 함께 넘길 링크 - setAd 메시지로 채워진다
+  var currentLink = "";
+
   // 웹 -> Unity : NativeBrowser가 주입하는 브릿지로 JSON 문자열을 보낸다.
   // Unity의 WebViewPopupUI._onMessageReceived에서 이 문자열을 그대로 받는다.
   function sendToUnity(payload) {
@@ -101,16 +221,16 @@
     }
   }
 
-  document.getElementById("banner").addEventListener("click", function () {
+  function sendCta() {
     sendToUnity({ type: "cta", link: currentLink });
-  });
+  }
 
-  // CTA를 눌렀을 때 Unity로 함께 넘길 링크 - setAd 메시지로 채워진다
-  var currentLink = "";
+  document.getElementById("hero").addEventListener("click", sendCta);
+  document.getElementById("ctaBtn").addEventListener("click", sendCta);
 
   // Unity -> 웹 : 광고 내용을 런타임에 바꿔 끼운다. 페이지를 다시 배포하지 않아도
-  // 제목/문구/이미지/링크를 앱에서 내려줄 수 있다.
-  //   보내는 형식 : {"type":"setAd","title":"...","body":"...","image":"...","link":"..."}
+  // 제목/문구/버튼문구/이미지/링크를 앱에서 내려줄 수 있다.
+  //   보내는 형식 : {"type":"setAd","title":"...","body":"...","cta":"...","image":"...","link":"..."}
   window.addEventListener("message", function (e) {
     var data;
 
@@ -132,16 +252,20 @@
       document.getElementById("adBody").textContent = data.body;
     }
 
+    if (typeof data.cta === "string") {
+      document.getElementById("adCtaText").textContent = data.cta;
+    }
+
     if (typeof data.link === "string") {
       currentLink = data.link;
     }
 
-    // 이미지를 내려주면 기본 그라데이션/문구 대신 이미지를 채운다
+    // 이미지를 내려주면 기본 코인 아트 대신 이미지를 채운다
     if (typeof data.image === "string" && data.image.length > 0) {
       var image = document.getElementById("adImage");
       image.src = data.image;
       image.classList.add("visible");
-      document.getElementById("bannerText").classList.add("hidden");
+      document.getElementById("heroArt").classList.add("hidden");
     }
   });
 </script>
