@@ -76,39 +76,6 @@
     display: none;
   }
 
-  /* 하단 버튼 영역 - 높이를 고정해서 배너가 남은 공간을 전부 차지하게 한다 */
-  .footer {
-    flex: 0 0 auto;
-    display: flex;
-    border-top: 1px solid #ececec;
-    background: #ffffff;
-  }
-
-  .footer button {
-    flex: 1;
-    padding: 16px 8px;
-    font-size: 14px;
-    font-family: inherit;
-    background: none;
-    border: none;
-    color: #666666;
-    cursor: pointer;
-  }
-
-  .footer button:active {
-    background: #f2f2f2;
-  }
-
-  .footer button.primary {
-    color: #111111;
-    font-weight: 600;
-  }
-
-  .footer .divider {
-    width: 1px;
-    background: #ececec;
-    margin: 10px 0;
-  }
 </style>
 </head>
 <body>
@@ -118,12 +85,6 @@
       <h1 id="adTitle">이벤트 진행 중</h1>
       <p id="adBody">지금 참여하고 포인트를 받아가세요.</p>
     </div>
-  </div>
-
-  <div class="footer">
-    <button id="todayBtn">오늘 하루 보지 않기</button>
-    <div class="divider"></div>
-    <button id="closeBtn" class="primary">닫기</button>
   </div>
 
 <script>
@@ -142,14 +103,6 @@
 
   document.getElementById("banner").addEventListener("click", function () {
     sendToUnity({ type: "cta", link: currentLink });
-  });
-
-  document.getElementById("todayBtn").addEventListener("click", function () {
-    sendToUnity({ type: "closeToday" });
-  });
-
-  document.getElementById("closeBtn").addEventListener("click", function () {
-    sendToUnity({ type: "close" });
   });
 
   // CTA를 눌렀을 때 Unity로 함께 넘길 링크 - setAd 메시지로 채워진다
